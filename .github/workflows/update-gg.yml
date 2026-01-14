@@ -1,0 +1,117 @@
+name: Update gg Formula
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Run daily at 9 AM UTC
+    - cron: '0 9 * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  update-gg:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout tap repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fetch latest release from gg repo
+        id: get-latest
+        run: |
+          LATEST_TAG=$(gh release view --repo frankwiles/gg --json tagName --jq '.tagName')
+          LATEST_VERSION="${LATEST_TAG#v}"
+          echo "tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+          echo "version=$LATEST_VERSION" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check current version in formula
+        id: check-current
+        run: |
+          CURRENT_VERSION=$(grep 'version "' Formula/gg.rb | sed 's/.*"\(.*\)".*/\1/')
+          echo "current=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Download binaries and calculate checksums
+        if: steps.get-latest.outputs.version != steps.check-current.outputs.current
+        id: checksums
+        run: |
+          VERSION="${{ steps.get-latest.outputs.version }}"
+          TAG="${{ steps.get-latest.outputs.tag }}"
+
+          # Download ARM binary
+          curl -Ls "https://github.com/frankwiles/gg/releases/download/${TAG}/gg-macos-aarch64" -o /tmp/gg-aarch64
+          ARM_SHA=$(shasum -a 256 /tmp/gg-aarch64 | awk '{print $1}')
+
+          # Download Intel binary
+          curl -Ls "https://github.com/frankwiles/gg/releases/download/${TAG}/gg-macos-x86_64" -o /tmp/gg-x86_64
+          INTEL_SHA=$(shasum -a 256 /tmp/gg-x86_64 | awk '{print $1}')
+
+          echo "arm_sha=$ARM_SHA" >> $GITHUB_OUTPUT
+          echo "intel_sha=$INTEL_SHA" >> $GITHUB_OUTPUT
+
+      - name: Update formula
+        if: steps.get-latest.outputs.version != steps.check-current.outputs.current
+        run: |
+          VERSION="${{ steps.get-latest.outputs.version }}"
+          TAG="${{ steps.get-latest.outputs.tag }}"
+          ARM_SHA="${{ steps.checksums.outputs.arm_sha }}"
+          INTEL_SHA="${{ steps.checksums.outputs.intel_sha }}"
+
+          cat > Formula/gg.rb << 'EOF'
+          # typed: false
+          # frozen_string_literal: true
+
+          class Gg < Formula
+            desc "A Rust CLI utility for quick git operations"
+            homepage "https://github.com/frankwiles/gg"
+            version "#{VERSION}"
+            license "MIT"
+            depends_on :macos
+
+            if Hardware::CPU.intel?
+              url "https://github.com/frankwiles/gg/releases/download/#{TAG}/gg-macos-x86_64"
+              sha256 "#{INTEL_SHA}"
+
+              def install
+                bin.install "gg-macos-x86_64" => "gg"
+              end
+            end
+
+            if Hardware::CPU.arm?
+              url "https://github.com/frankwiles/gg/releases/download/#{TAG}/gg-macos-aarch64"
+              sha256 "#{ARM_SHA}"
+
+              def install
+                bin.install "gg-macos-aarch64" => "gg"
+              end
+            end
+
+            test do
+              system "#{bin}/gg", "--version"
+            end
+          end
+          EOF
+
+          # Use envsubst to replace variables
+          envsubst < Formula/gg.rb > /tmp/gg.rb
+          mv /tmp/gg.rb Formula/gg.rb
+        env:
+          VERSION: ${{ steps.get-latest.outputs.version }}
+          TAG: ${{ steps.get-latest.outputs.tag }}
+          ARM_SHA: ${{ steps.checksums.outputs.arm_sha }}
+          INTEL_SHA: ${{ steps.checksums.outputs.intel_sha }}
+
+      - name: Create Pull Request
+        if: steps.get-latest.outputs.version != steps.check-current.outputs.current
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "Update gg to v${{ steps.get-latest.outputs.version }}"
+          body: |
+            Automated update for gg v${{ steps.get-latest.outputs.version }}
+            committer: GitHub <noreply@github.com>
+          branch: "update-gg-${{ steps.get-latest.outputs.version }}"
+          delete-branch: true
