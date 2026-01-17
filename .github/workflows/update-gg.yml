@@ -15,9 +15,6 @@ jobs:
     steps:
       - name: Checkout tap repo
         uses: actions/checkout@v6
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          persist-credentials: false
 
       - name: Fetch latest release from gg repo
         id: get-latest
