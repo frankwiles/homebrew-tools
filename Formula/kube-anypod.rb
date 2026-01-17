@@ -4,13 +4,13 @@
 class KubeAnypod < Formula
   desc "Return the name of any pod from a given Deployment, StatefulSet, or DaemonSet"
   homepage "https://github.com/frankwiles/kube-anypod"
-  version "0.2.0"
+  version "#{VERSION}"
   license "BSD-3-Clause"
   depends_on :macos
 
   if Hardware::CPU.intel?
-    url "https://github.com/frankwiles/kube-anypod/releases/download/v0.2.0/anypod-macos-x86_64"
-    sha256 "f79ec3a5dcbe29d55dffde8d16ccae2ebe8b2181a61c6b970ef10f43b8bdb5c0"
+    url "https://github.com/frankwiles/kube-anypod/releases/download/#{TAG}/anypod-macos-x86_64"
+    sha256 "#{INTEL_SHA}"
 
     def install
       bin.install "anypod-macos-x86_64" => "anypod"
@@ -18,8 +18,8 @@ class KubeAnypod < Formula
   end
 
   if Hardware::CPU.arm?
-    url "https://github.com/frankwiles/kube-anypod/releases/download/v0.2.0/anypod-macos-aarch64"
-    sha256 "8405432faa59ec42bd9a924dc77a4e0d2b719a229b911697aeca89dbf16d8c12"
+    url "https://github.com/frankwiles/kube-anypod/releases/download/#{TAG}/anypod-macos-aarch64"
+    sha256 "#{ARM_SHA}"
 
     def install
       bin.install "anypod-macos-aarch64" => "anypod"
