@@ -14,19 +14,17 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout tap repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Fetch latest release from gg repo
         id: get-latest
         run: |
-          LATEST_TAG=$(gh release view --repo frankwiles/gg --json tagName --jq '.tagName')
+          LATEST_TAG=$(curl -s "https://api.github.com/repos/frankwiles/gg/releases/latest" | jq -r '.tag_name')
           LATEST_VERSION="${LATEST_TAG#v}"
           echo "tag=$LATEST_TAG" >> $GITHUB_OUTPUT
           echo "version=$LATEST_VERSION" >> $GITHUB_OUTPUT
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check current version in formula
         id: check-current
