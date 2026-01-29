@@ -24,8 +24,13 @@ jobs:
         run: |
           LATEST_TAG=$(curl -s "https://api.github.com/repos/frankwiles/kube-anypod/releases/latest" | jq -r '.tag_name')
           LATEST_VERSION="${LATEST_TAG#v}"
-          echo "tag=$LATEST_TAG" >> $GITHUB_OUTPUT
-          echo "version=$LATEST_VERSION" >> $GITHUB_OUTPUT
+          echo "tag=${LATEST_TAG}" >> $GITHUB_OUTPUT
+          echo "version=${LATEST_VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Debug version info
+        run: |
+          echo "Latest tag: ${{ steps.get-latest.outputs.tag }}"
+          echo "Latest version: ${{ steps.get-latest.outputs.version }}"
 
       - name: Check current version in formula
         id: check-current
@@ -66,13 +71,13 @@ jobs:
           class KubeAnypod < Formula
             desc "Return the name of any pod from a given Deployment, StatefulSet, or DaemonSet"
             homepage "https://github.com/frankwiles/kube-anypod"
-            version "$VERSION"
+            version "${VERSION}"
             license "BSD-3-Clause"
             depends_on :macos
 
             if Hardware::CPU.intel?
-              url "https://github.com/frankwiles/kube-anypod/releases/download/$TAG/anypod-macos-x86_64"
-              sha256 "$INTEL_SHA"
+              url "https://github.com/frankwiles/kube-anypod/releases/download/${TAG}/anypod-macos-x86_64"
+              sha256 "${INTEL_SHA}"
 
               def install
                 bin.install "anypod-macos-x86_64" => "anypod"
@@ -80,8 +85,8 @@ jobs:
             end
 
             if Hardware::CPU.arm?
-              url "https://github.com/frankwiles/kube-anypod/releases/download/$TAG/anypod-macos-aarch64"
-              sha256 "$ARM_SHA"
+              url "https://github.com/frankwiles/kube-anypod/releases/download/${TAG}/anypod-macos-aarch64"
+              sha256 "${ARM_SHA}"
 
               def install
                 bin.install "anypod-macos-aarch64" => "anypod"
