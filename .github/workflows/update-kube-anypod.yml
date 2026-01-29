@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout tap repo
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - name: Fetch latest release from kube-anypod repo
         id: get-latest
