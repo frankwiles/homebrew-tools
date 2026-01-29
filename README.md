@@ -13,3 +13,9 @@ Making it easier for people to install the various tools I've built.
 [Github Repo](https://github.com/frankwiles/kube-secrets) 
 
 `brew install frankwiles/tools/kube-secrets`
+
+## kube-anypod 
+
+[Github Repo](https://github.com/frankwiles/kube-anypod) 
+
+`brew install frankwiles/tools/kube-anypod`
