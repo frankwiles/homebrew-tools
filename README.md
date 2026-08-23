@@ -8,6 +8,12 @@ Making it easier for people to install the various tools I've built.
 
 `brew install frankwiles/tools/gg`
 
+## dic
+
+[Github Repo](https://github.com/frankwiles/dic)
+
+`brew install frankwiles/tools/dic`
+
 ## kube-secrets 
 
 [Github Repo](https://github.com/frankwiles/kube-secrets) 
