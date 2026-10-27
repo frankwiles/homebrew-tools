@@ -8,8 +8,8 @@ class Dic < Formula
   depends_on :macos
 
   if Hardware::CPU.intel?
-    url "https://github.com/frankwiles/dic/releases/download/v0.5.0/dic-macos-x86_64"
-    sha256 "1aa69a45b2d0aeba524545033167204cb5bb145cbce86e7f52100ecee914ec5d"
+    url "https://github.com/frankwiles/dic/releases/download/v0.5.1/dic-macos-x86_64"
+    sha256 "27d9616a429a315a73cb85e1989f93efcdbeb02dabc30add76d3b367054c5776"
 
     def install
       bin.install "dic-macos-x86_64" => "dic"
@@ -17,8 +17,8 @@ class Dic < Formula
   end
 
   if Hardware::CPU.arm?
-    url "https://github.com/frankwiles/dic/releases/download/v0.5.0/dic-macos-aarch64"
-    sha256 "d458ea3a57bf079532cbfb736d64005a602645149b1b92621f300840792ac912"
+    url "https://github.com/frankwiles/dic/releases/download/v0.5.1/dic-macos-aarch64"
+    sha256 "7ec6d80cd3fc19dc6bc08e3642816162a40f95c2df93abdb420e5f5a6a6797d0"
 
     def install
       bin.install "dic-macos-aarch64" => "dic"
